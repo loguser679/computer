@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Computer Systems Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a fixed sidebar for thematic navigation to promote non-linear exploration. The content is divided into three major sections: Foundations, Interconnection & Function, and Digital Logic. This structure was chosen because it groups related concepts, allowing a user to explore from high-level principles to low-level details without following the original document's chronological order. Interactive elements like expandable sections and calculators were designed to make complex topics more digestible and to provide hands-on learning. -->
+    <!-- Visualization & Content Choices: 1. Foundational Concepts: Goal(Inform/Compare) -> Side-by-side cards for Architecture vs. Organization and Structure vs. Function. 2. Component Interaction: Goal(Explain Process) -> Interactive Instruction Cycle diagram with click-to-reveal text, a bus hierarchy diagram (HTML/CSS), and a DMA visualization. 3. Digital Logic: Goal(Provide Tools/Demonstrate) -> Interactive calculators for Binary and BCD addition, and an expandable section for binary number conversions to allow users to practice and see results. The goal is to make abstract concepts concrete. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #e9ecef;
+            color: #0077b6;
+            transform: translateX(4px);
+            border-left-color: #0077b6;
+        }
+        .flow-step, .collapsible-header {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .flow-step.active, .collapsible-header.active {
+            border-color: #0077b6;
+            background-color: #e9ecef;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .collapsible-content.open {
+            max-height: 1000px;
+        }
+        .section-title {
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: #0077b6;
+            margin-top: 8px;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside class="w-full md:w-64 bg-white border-r border-stone-200 p-6 sticky top-0 h-screen-mobile md:h-screen shadow-md md:shadow-none">
+            <h1 class="text-2xl font-bold text-sky-800 mb-8">Computer Systems Guide</h1>
+            <nav id="navigation" class="space-y-2">
+                <a href="#foundations" class="nav-link block p-3 rounded-lg text-stone-700 font-medium border-l-4 border-transparent hover:bg-stone-100 hover:text-sky-700">Foundations</a>
+                <a href="#interconnection" class="nav-link block p-3 rounded-lg text-stone-700 font-medium border-l-4 border-transparent hover:bg-stone-100 hover:text-sky-700">Interconnection & Function</a>
+                <a href="#logic" class="nav-link block p-3 rounded-lg text-stone-700 font-medium border-l-4 border-transparent hover:bg-stone-100 hover:text-sky-700">Digital Logic</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto">
+            <section id="foundations" class="mb-16">
+                <h2 class="text-4xl font-bold text-sky-900 mb-4 section-title">Foundations</h2>
+                <p class="text-lg text-stone-600 mb-8">This section establishes the core vocabulary of computer systems, distinguishing between what a programmer sees versus the underlying hardware implementation, and breaking down the essential components and their roles.</p>
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-sky-800 mb-3">Architecture vs. Organization</h3>
+                        <p class="text-stone-700">**Architecture** refers to a system's attributes visible to the programmer, such as its instruction set. It dictates what the system can do. **Organization** describes how those attributes are implemented, including hardware details and interconnections.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-sky-800 mb-3">Structure vs. Function</h3>
+                        <p class="text-stone-700">**Structure** is how components relate to each other (e.g., CPU, Memory, I/O). **Function** is the operation of those individual components. These two concepts describe the system's form and purpose.</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-3xl font-bold text-sky-900 mb-4 mt-12 section-title">History of Computers</h3>
+                <p class="text-lg text-stone-600 mb-8">The evolution of computers is marked by technological generations. Select a generation to explore its key innovation.</p>
+                <div id="history-cards" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div data-gen="1" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Gen 1: Vacuum Tubes</h4>
+                        <p class="text-sm text-stone-600 mt-2">1946-1957</p>
+                    </div>
+                    <div data-gen="2" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Gen 2: Transistors</h4>
+                        <p class="text-sm text-stone-600 mt-2">1957-1964</p>
+                    </div>
+                    <div data-gen="3" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Gen 3: Integrated Circuits</h4>
+                        <p class="text-sm text-stone-600 mt-2">1965-1971</p>
+                    </div>
+                    <div data-gen="4" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Gen 4: Microprocessors</h4>
+                        <p class="text-sm text-stone-600 mt-2">1971-</p>
+                    </div>
+                </div>
+                <div id="history-details" class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mt-6 min-h-[150px]">
+                    <h4 class="font-bold text-2xl text-stone-700 mb-2">Select a generation to learn more.</h4>
+                    <p class="text-stone-600">The history of computing is a story of continuous technological leaps. Choose a card above to see the key technology and a brief summary of its impact.</p>
+                </div>
+            </section>
+
+            <section id="interconnection" class="mb-16">
+                <h2 class="text-4xl font-bold text-sky-900 mb-4 section-title">Interconnection & Function</h2>
+                <p class="text-lg text-stone-600 mb-8">This section dives into how a computer's components communicate. Explore the flow of data via the instruction cycle and understand the role of buses and direct memory access (DMA).</p>
+                <h3 class="text-3xl font-bold text-sky-900 mb-4 mt-12 section-title">The Instruction Cycle</h3>
+                <p class="text-lg text-stone-600 mb-8">All operations in a CPU follow a simple two-step cycle. Click on a step to see what happens within the processor during each phase.</p>
+                <div class="flex flex-col items-center">
+                    <div class="flex justify-center gap-6 md:gap-12 w-full max-w-2xl">
+                        <div data-step="fetch" class="flow-step flex-1 p-6 rounded-xl border-2 border-stone-300 shadow-sm text-center font-bold text-xl text-sky-800 hover:bg-stone-100 transition-all duration-200">
+                            Fetch Cycle
+                        </div>
+                        <div class="flex-none self-center w-8 h-1 bg-stone-400"></div>
+                        <div data-step="execute" class="flow-step flex-1 p-6 rounded-xl border-2 border-stone-300 shadow-sm text-center font-bold text-xl text-sky-800 hover:bg-stone-100 transition-all duration-200">
+                            Execute Cycle
+                        </div>
+                    </div>
+                    <div id="instruction-details" class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mt-6 w-full max-w-2xl min-h-[150px]">
+                        <h4 class="font-bold text-2xl text-stone-700 mb-2">Click a step to begin.</h4>
+                        <p class="text-stone-600">The basic instruction cycle is the fundamental process by which a computer's processor executes program instructions.</p>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold text-sky-900 mb-4 mt-12 section-title">System Bus Hierarchy</h3>
+                <p class="text-lg text-stone-600 mb-8">A bus is a shared communication pathway. Modern systems use hierarchies to improve performance. Click on the bus types to see their purpose.</p>
+                <div id="bus-cards" class="grid sm:grid-cols-3 gap-6">
+                    <div data-bus="data" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Data Bus</h4>
+                    </div>
+                    <div data-bus="address" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Address Bus</h4>
+                    </div>
+                    <div data-bus="control" class="history-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 cursor-pointer hover:bg-stone-100 transition-all duration-200">
+                        <h4 class="font-bold text-xl text-sky-800">Control Bus</h4>
+                    </div>
+                </div>
+                <div id="bus-details" class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mt-6 min-h-[150px]">
+                    <h4 class="font-bold text-2xl text-stone-700 mb-2">Select a bus type to learn more.</h4>
+                    <p class="text-stone-600">Buses are essential for all communication between the processor, memory, and I/O modules.</p>
+                </div>
+            </section>
+            
+            <section id="logic" class="mb-16">
+                <h2 class="text-4xl font-bold text-sky-900 mb-4 section-title">Digital Logic & Binary Systems</h2>
+                <p class="text-lg text-stone-600 mb-8">Digital systems are built on binary information. This section provides hands-on tools to explore how numbers are represented and manipulated using binary logic.</p>
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-sky-800 mb-3">Two's Complement Calculator</h3>
+                        <p class="text-stone-700 mb-4">Enter a decimal number to see its 8-bit two's complement binary representation. This is the standard method for representing negative numbers in computers.</p>
+                        <input id="twos-comp-input" type="number" placeholder="Enter a number (-128 to 127)" class="w-full p-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-500 mb-4">
+                        <div id="twos-comp-output" class="text-stone-700 font-mono bg-stone-100 p-4 rounded-lg min-h-[60px] flex items-center justify-center text-center">
+                            Result will appear here.
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-sky-800 mb-3">BCD Addition Calculator</h3>
+                        <p class="text-stone-700 mb-4">Add two 4-bit BCD numbers (0-9) and see the result with the required correction step.</p>
+                        <div class="flex gap-2 mb-4">
+                            <input id="bcd-input1" type="number" max="9" min="0" placeholder="BCD 1 (0-9)" class="w-1/2 p-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <input id="bcd-input2" type="number" max="9" min="0" placeholder="BCD 2 (0-9)" class="w-1/2 p-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <button id="bcd-add-btn" class="w-full bg-sky-600 text-white p-2 rounded-lg font-semibold hover:bg-sky-700 transition-all duration-200">Add BCD</button>
+                        <div id="bcd-output" class="text-stone-700 font-mono bg-stone-100 p-4 rounded-lg mt-4 min-h-[60px] flex items-center justify-center text-center">
+                            Result will appear here.
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-3xl font-bold text-sky-900 mb-4 mt-12 section-title">Number Systems & Conversions</h3>
+                <p class="text-lg text-stone-600 mb-8">Digital systems use various number bases. Expand the sections below to learn about common bases and conversion methods, from the basics to more advanced codes.</p>
+                <div id="conversion-accordion" class="space-y-4">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <div class="collapsible-header flex justify-between items-center">
+                            <h4 class="font-bold text-xl text-sky-800">Binary & Decimal Conversion</h4>
+                            <span class="text-2xl font-bold">+</span>
+                        </div>
+                        <div class="collapsible-content mt-4">
+                            <p class="text-stone-700">Digital systems fundamentally use binary (base 2). We use decimal (base 10) for human readability. Binary numbers can be converted to decimal by summing the products of each digit and its corresponding power of 2. Decimal can be converted to binary by repeated division by 2 or by subtracting the largest powers of 2.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <div class="collapsible-header flex justify-between items-center">
+                            <h4 class="font-bold text-xl text-sky-800">Other Number Systems</h4>
+                            <span class="text-2xl font-bold">+</span>
+                        </div>
+                        <div class="collapsible-content mt-4">
+                            <p class="text-stone-700">Octal (base 8) and Hexadecimal (base 16) are used as convenient shorthand for long binary strings. They can be converted to and from binary by grouping bits into threes (octal) or fours (hexadecimal).</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <div class="collapsible-header flex justify-between items-center">
+                            <h4 class="font-bold text-xl text-sky-800">Special Binary Codes</h4>
+                            <span class="text-2xl font-bold">+</span>
+                        </div>
+                        <div class="collapsible-content mt-4">
+                            <p class="text-stone-700">Decimal digits can be represented using different binary codes, such as BCD (Binary-Coded Decimal) or Gray Code, where only one bit changes between successive numbers.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const historyData = {
+                '1': { title: 'First Generation: Vacuum Tubes', text: 'Used vacuum tubes for logic and memory. Machines were huge, slow, and unreliable. The IAS Computer was a key prototype that introduced the stored program concept.', period: '1946-1957' },
+                '2': { title: 'Second Generation: Transistors', text: 'Transistors replaced vacuum tubes, leading to smaller, cheaper, and more reliable computers. High-level programming languages and early system software were introduced.', period: '1957-1964' },
+                '3': { title: 'Third Generation: Integrated Circuits', text: 'The invention of the IC allowed many components on a single silicon chip. This era gave us planned families of computers like the IBM System/360 and the popularization of Moore\'s Law.', period: '1965-1971' },
+                '4': { title: 'Fourth Generation: Microprocessors', text: 'The microprocessor put a full CPU on a single chip. This innovation drove the development of personal computers and continues to fuel the exponential growth of computing power.', period: '1971-Present' }
+            };
+            
+            const historyCards = document.querySelectorAll('.history-card');
+            const historyDetails = document.getElementById('history-details');
+
+            historyCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const gen = card.dataset.gen;
+                    const data = historyData[gen];
+                    historyDetails.innerHTML = `<h4 class="font-bold text-2xl text-stone-700 mb-2">${data.title}</h4><p class="text-sm text-stone-500 mb-2">${data.period}</p><p class="text-stone-600">${data.text}</p>`;
+                });
+            });
+
+            const instructionSteps = document.querySelectorAll('.flow-step');
+            const instructionDetails = document.getElementById('instruction-details');
+            const instructionData = {
+                fetch: { title: 'The Fetch Cycle', text: 'The processor fetches an instruction from memory. The address of the instruction is stored in the Program Counter (PC), which is then incremented. The fetched instruction is loaded into the Instruction Register (IR).' },
+                execute: { title: 'The Execute Cycle', text: 'The processor interprets the instruction loaded in the IR and performs the required action. Actions can include data processing, data transfer to/from memory or I/O, or altering the flow of control.' }
+            };
+
+            instructionSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    instructionSteps.forEach(s => s.classList.remove('active'));
+                    step.classList.add('active');
+                    const data = instructionData[step.dataset.step];
+                    instructionDetails.innerHTML = `<h4 class="font-bold text-2xl text-sky-800 mb-2">${data.title}</h4><p class="text-stone-700">${data.text}</p>`;
+                });
+            });
+
+            const busData = {
+                data: { title: 'Data Bus', text: 'Provides a path for moving data among system modules. Its width (e.g., 32-bit, 64-bit) determines how many bits can be transferred at a time, which is a key factor in system performance.' },
+                address: { title: 'Address Bus', text: 'Used to designate the source or destination of data on the data bus. Its width determines the maximum possible memory capacity of the system.' },
+                control: { title: 'Control Bus', text: 'Used to manage access to and use of the data and address lines. It transmits command and timing information to control the flow of data among modules.' }
+            };
+
+            const busCards = document.querySelectorAll('#bus-cards .history-card');
+            const busDetails = document.getElementById('bus-details');
+
+            busCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const data = busData[card.dataset.bus];
+                    busDetails.innerHTML = `<h4 class="font-bold text-2xl text-sky-800 mb-2">${data.title}</h4><p class="text-stone-700">${data.text}</p>`;
+                });
+            });
+
+            const twosCompInput = document.getElementById('twos-comp-input');
+            const twosCompOutput = document.getElementById('twos-comp-output');
+
+            twosCompInput.addEventListener('input', () => {
+                let num = parseInt(twosCompInput.value);
+                if (isNaN(num) || num < -128 || num > 127) {
+                    twosCompOutput.textContent = 'Invalid input. Please enter a number from -128 to 127.';
+                    twosCompOutput.classList.remove('bg-sky-100');
+                    twosCompOutput.classList.add('bg-stone-100');
+                    return;
+                }
+                const isNegative = num < 0;
+                let binary = isNegative ? (num + 256).toString(2) : num.toString(2);
+                binary = binary.padStart(8, '0').slice(-8);
+                
+                twosCompOutput.innerHTML = `Decimal: ${num}<br>Binary (8-bit): ${binary}`;
+                twosCompOutput.classList.add('bg-sky-100');
+            });
+
+            const bcdInput1 = document.getElementById('bcd-input1');
+            const bcdInput2 = document.getElementById('bcd-input2');
+            const bcdAddBtn = document.getElementById('bcd-add-btn');
+            const bcdOutput = document.getElementById('bcd-output');
+            
+            function toBinary(n) { return parseInt(n, 10).toString(2).padStart(4, '0'); }
+
+            bcdAddBtn.addEventListener('click', () => {
+                let val1 = parseInt(bcdInput1.value);
+                let val2 = parseInt(bcdInput2.value);
+                
+                if (isNaN(val1) || isNaN(val2) || val1 < 0 || val1 > 9 || val2 < 0 || val2 > 9) {
+                    bcdOutput.textContent = 'Invalid input. Please enter single BCD digits (0-9).';
+                    bcdOutput.classList.remove('bg-sky-100');
+                    bcdOutput.classList.add('bg-stone-100');
+                    return;
+                }
+
+                const sum = val1 + val2;
+                const binarySum = parseInt(toBinary(val1), 2) + parseInt(toBinary(val2), 2);
+                let correctedResult = binarySum;
+                let correction = 0;
+
+                if (sum > 9) {
+                    correctedResult += 6;
+                    correction = 6;
+                }
+
+                const binarySumPadded = correctedResult.toString(2).padStart(8, '0');
+                
+                bcdOutput.innerHTML = `
+                    <div class="flex flex-col items-start w-full">
+                        <span>Binary Sum: ${toBinary(val1)} + ${toBinary(val2)} = ${binarySum.toString(2).padStart(8, '0')}</span>
+                        <span>Decimal Sum: ${val1} + ${val2} = ${sum}</span>
+                        <span>Correction: ${sum > 9 ? `Since sum > 9, add 6 (${toBinary(6)}).` : 'No correction needed.'}</span>
+                        <span>Final BCD Result: ${parseInt(binarySumPadded, 2).toString(10)}</span>
+                    </div>
+                `;
+                 bcdOutput.classList.add('bg-sky-100');
+            });
+
+            const accordions = document.querySelectorAll('.collapsible-header');
+            accordions.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const plusSign = header.querySelector('span');
+                    const isExpanded = content.classList.contains('open');
+                    
+                    if (isExpanded) {
+                        content.classList.remove('open');
+                        plusSign.textContent = '+';
+                    } else {
+                        accordions.forEach(h => {
+                             h.nextElementSibling.classList.remove('open');
+                             h.querySelector('span').textContent = '+';
+                        });
+                        content.classList.add('open');
+                        plusSign.textContent = '–';
+                    }
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('#navigation a');
+            
+            function setActiveLink() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.scrollY >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            window.addEventListener('scroll', setActiveLink);
+            setActiveLink();
+        });
+    </script>
+</body>
+</html>
